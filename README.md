@@ -8,10 +8,6 @@ I was inspired by <a href="https://femurdesign.com/omni/">OMNI by Femur</a> and 
 
 Play the keys with mouse or touch or even plug a MIDI keyboard in. Record simple loops and have fun exploring the unique sounds of different cultures patterns!
 
-<p>
-<img src="https://github.com/Jacki3/jackbrett/blob/main/img/Looper/main.png" style="max-width: 100%;">
-</p>
-
 <p><a href="https://github.com/Jacki3/Looper">
 <img src="https://github.com/Jacki3/jackbrett/blob/main/img/Looper/main.png" style="max-width: 100%;">
 </a></p>
