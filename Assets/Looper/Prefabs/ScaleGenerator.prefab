@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5612154351421515038
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5612154351421515036}
+  - component: {fileID: 5612154351421515037}
+  m_Layer: 0
+  m_Name: ScaleGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5612154351421515036
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5612154351421515038}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4860.4775, y: 1023.85583, z: 715.0775}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5612154351421515037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5612154351421515038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc9e3f03decd0c842a61e99194370bc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  notes: 3c0000003e00000040000000410000004300000045000000
+  useScale: 1
+  scaleChoice: 3
+  rootNote: 0
+  octavesAbove: 5
+  spanMultipleOctaves: 0
+  octaveRange: 0
+  totalMIDIKeys: 88
+  scales:
+  - name: Aeolian
+    scaleEnum: 0
+    description: The Aeolian mode is also known as the 'natural minor' scale and
+      has the same notes as its relative major scale, but is built starting from
+      the sixth note. On a piano using only white keys, the Aeolian mode would start
+      from A.`
+    intervals: 0000000002000000030000000500000007000000080000000a000000
+  - name: Major
+    scaleEnum: 1
+    description: The major scale (or Ionian scale) is one of the most commonly used
+      musical scales, especially in Western music
+    intervals: 0000000002000000040000000500000007000000090000000b000000
+  - name: "Hiraj\u014Dshi"
+    scaleEnum: 2
+    description: "Containing 5 notes from the minor scale, Hiraj\u014Dshi was adapted
+      from shamisen music for the koto, a japanese stringed instrument"
+    intervals: 0000000002000000030000000700000008000000
+  - name: "Miny\u014D"
+    scaleEnum: 3
+    description: A pentatonic scale containing only major notes and is used in traditional
+      Japanese folk music.
+    intervals: 0000000002000000050000000700000009000000
+  - name: Chromatic
+    scaleEnum: 4
+    description: Chromatic scales are the scales that includes all twelve tones in
+      sequential order. Chromatic scales can start from any of the twelve tones,
+      so there are twelve different iterations or inversions of the scale.
+    intervals: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+  - name: Algerian
+    scaleEnum: 5
+    description: Also known as the 'Acoustic' or 'Overtone' scale, differs from the
+      major scale in having a raised fourth and lowered seventh. Traditionally, the
+      scale persists in the music of peoples of South Siberia, especially in Tuvan
+      music
+    intervals: 0000000002000000030000000600000007000000080000000b000000
+  - name: Altered
+    scaleEnum: 6
+    description: In jazz, the altered scale is a seven-note scale that is a dominant
+      scale where all non-essential tones have been altered. This means that it comprises
+      the three essential tones that define a dominant seventh chord, which are root,
+      major third, and minor seventh and that all other chord tones have been altered
+    intervals: 0000000001000000030000000400000006000000080000000a000000
