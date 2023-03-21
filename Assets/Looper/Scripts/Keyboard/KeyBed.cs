@@ -14,6 +14,7 @@ public class KeyBed : MonoBehaviour
     public NotationGenerator notationGenerator;
     public GameObject keyLine;
     public Key key;
+    public Color rootKeyColour = Color.black;
     private float screenWidth;
     private float lineWidth;
     private int totalButtons;
@@ -108,8 +109,8 @@ public class KeyBed : MonoBehaviour
             {
                 Button b = newButton.button;
                 ColorBlock cb = b.colors;
-                cb.normalColor = Color.black;
-                cb.selectedColor = Color.black;
+                cb.normalColor = rootKeyColour;
+                cb.selectedColor = rootKeyColour;
                 b.colors = cb;
             }
 

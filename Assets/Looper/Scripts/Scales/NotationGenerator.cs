@@ -2,14 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //TODO:
-//finish off the generator based on octave ranges
-//get the audio helm new samples - plug in midi and find errors with playing specific notes in octave ranges
-//figure out how to generate patterns both in scales and outside of?
-//build luke player looper then UI in a new scene (with the updated keyboard graphic + metronome should be here too)
-//begin to add notation images you could also update the text to reflect the exact note
-//have patterns and note choices be visual (choose by keyboard for all notes and choose by name for patterns)
-//polish up and try to tidy up the play in any scale logic
-//this is called scale generator 
+//rename this to scale generator (notation generator is used for another game)
+//update this to work with frequencies rather than just int intervals
+
+//A class which generates a scale based on a given root note and scale choice
+//Thus far it only works with scales that fit within the classic 12 note scale (the chromatic)
 public class NotationGenerator : MonoBehaviour
 {
     public int[] notes;
