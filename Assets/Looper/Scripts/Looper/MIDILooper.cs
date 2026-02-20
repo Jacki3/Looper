@@ -1,9 +1,9 @@
+using AudioHelm;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using AudioHelm;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 public class MIDILooper : MonoBehaviour
 {
@@ -130,6 +130,8 @@ public class MIDILooper : MonoBehaviour
 
     public void RecordLoop()
     {
+        isPlaying = true;
+
         if (!recOutput)
         {
             //recording a brand new loop
@@ -195,16 +197,22 @@ public class MIDILooper : MonoBehaviour
         }
     }
 
+    private bool isPlaying;
+
     public void StopPlaying()
     {
         foreach (Recording recording in MIDIRecordings)
         {
             StopCoroutine(recording.PlayNotes);
         }
+        isPlaying = false;
     }
 
     public void StartPlaying()
     {
+        if (isPlaying) return;
+        isPlaying = true;
+
         foreach (Recording recording in MIDIRecordings)
         {
             StartCoroutine(recording.PlayNotes);
