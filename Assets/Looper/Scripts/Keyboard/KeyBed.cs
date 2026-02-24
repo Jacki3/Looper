@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class KeyBed : MonoBehaviour
@@ -15,12 +13,16 @@ public class KeyBed : MonoBehaviour
     public GameObject keyLine;
     public Key key;
     public Color rootKeyColour = Color.black;
+    public Image[] scaleIncreaseIcons;
+
     private float screenWidth;
     private float lineWidth;
     private int totalButtons;
     private float dist;
     private List<GameObject> noteObjs = new List<GameObject>();
     private List<Key> keys = new List<Key>();
+
+    private Color defaultRootKeyColour;
 
     private void OnEnable()
     {
@@ -36,6 +38,7 @@ public class KeyBed : MonoBehaviour
 
     private void Start()
     {
+        defaultRootKeyColour = rootKeyColour;
         //the width of the key line
         lineWidth = keyLine.transform.localScale.x;
         //screen width is the size of the UI canvas minus the line width (*100 to get back to world space)
@@ -82,6 +85,20 @@ public class KeyBed : MonoBehaviour
             Destroy(noteObj);
         noteObjs.Clear();
 
+        rootKeyColour = defaultRootKeyColour;
+        Color keybedIconColor = Color.black;
+
+        if (ColourCycler.currentColour == Color.black)
+        {
+            rootKeyColour = Color.white;
+            keybedIconColor = Color.white;
+        }
+
+        foreach (var icon in scaleIncreaseIcons)
+        {
+            icon.color = keybedIconColor;
+        }
+
         totalButtons = notationGenerator.GetScaleFromRoot().Length * totalOctavesToSpawn + 1;
         dist = screenWidth / totalButtons;
         SpawnButtons();
@@ -104,15 +121,22 @@ public class KeyBed : MonoBehaviour
                 newButton.transform.localPosition = new Vector3(dist * i, 0, 0);
             }
 
+            Button b = newButton.button;
+            ColorBlock cb = b.colors;
+
             //divide the index by the length of the scale - if this is 0 we are on the root note so show this with a different colour 
             if (i % notationGenerator.GetScaleFromRoot().Length == 0)
             {
-                Button b = newButton.button;
-                ColorBlock cb = b.colors;
                 cb.normalColor = rootKeyColour;
                 cb.selectedColor = rootKeyColour;
-                b.colors = cb;
             }
+            else
+            {
+                cb.normalColor = ColourCycler.currentColour;
+                cb.selectedColor = ColourCycler.currentColour;
+            }
+
+            b.colors = cb;
 
             var tempX = newButton.transform.localScale;
             tempX.x = sizeX;

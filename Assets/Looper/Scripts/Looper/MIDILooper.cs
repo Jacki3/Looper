@@ -12,6 +12,9 @@ public class MIDILooper : MonoBehaviour
     public HelmController helmController;
     public List<Recording> MIDIRecordings = new List<Recording>();
     private Recording recorder;
+    private Coroutine masterPlayback;
+    private bool stopAfterCycle;
+    private bool waitingToRecord;
 
     [Serializable]
     public class Recording
@@ -23,11 +26,14 @@ public class MIDILooper : MonoBehaviour
         public double songPos;
         //if you are overdubbing, this will be how long the first loop created was; once we reach this, time get resets to 0
         public double loopLength;
+        public double recordingEndTime;
         public bool loopComplete;
         //this keeps track of the audio time since the loop began and is used when a midi note is played to keep track of what time it was played during the loop
         public double songTime;
         public MIDILooper looper;
         public IEnumerator PlayNotes;
+        public double playbackStartTime;
+        public bool isPlayingInSequence = false;
 
         public IEnumerator PlayMIDINotes()
         {
@@ -43,16 +49,25 @@ public class MIDILooper : MonoBehaviour
                     //sort the list by when each note was played
                     List<Notes> SortedList = notes.OrderBy(o => o.timeNotePlayed).ToList();
 
-                    for (int i = 0; i < SortedList.Count; i++)
+                    for (int i = 0; i <= SortedList.Count; i++)
                     {
                         //wait either for the first note or if the previous note depending on where we are in the loop
-                        float waitTime = (float)SortedList[i].timeNotePlayed;
-                        if (i > 0)
-                            waitTime = (float)SortedList[i].timeNotePlayed - (float)SortedList[i - 1].timeNotePlayed;
+                        float waitTime = 0;
+                        if (i != SortedList.Count)
+                        {
+                            waitTime = (float)SortedList[i].timeNotePlayed;
+                            if (i > 0)
+                                waitTime = (float)(SortedList[i].timeNotePlayed - SortedList[i - 1].timeNotePlayed);
+                        }
+                        else
+                        {
+                            waitTime = (float)(recordingEndTime - SortedList[i - 1].timeNotePlayed);
+                        }
 
                         yield return new WaitForSeconds(waitTime);
                         //here we have hardcoded the velocity and how long the note was played for - velocity is easy to get but note duration will require listening for note off rather than on in MIDI
-                        helmController.NoteOn(SortedList[i].noteNumber, 1f, 0.5f);
+                        if (i != SortedList.Count)
+                            helmController.NoteOn(SortedList[i].noteNumber, 1f, 0.5f);
                     }
                     if (this.loopLength > looper.LongestLoop())
                     {
@@ -61,7 +76,7 @@ public class MIDILooper : MonoBehaviour
                     else
                     {
                         //wait for the longest loop to finish
-                        yield return new WaitForSeconds((float)looper.LongestLoop() - (float)this.loopLength + 1f);
+                        yield return new WaitForSeconds((float)looper.LongestLoop() - (float)this.loopLength);
                     }
                 }
             }
@@ -86,8 +101,9 @@ public class MIDILooper : MonoBehaviour
         }
         public void RecordLoop()
         {
-            loopLength = notes[notes.Count - 1].timeNotePlayed;
-            StartSongTime();
+            loopLength = recordingEndTime;
+            if (looper.MIDIRecordings.Count <= 1)
+                StartSongTime();
         }
     }
 
@@ -102,16 +118,20 @@ public class MIDILooper : MonoBehaviour
         public float noteVelocity;
         //the difference in time from when recording started to when this note was played
         public double timeNotePlayed;
+        // how long the note was held down for
+        public float length;
     }
 
     private void OnEnable()
     {
         Keyboard.MIDIPlayed += RecordMIDINote;
+        Keyboard.MIDIOff += RecordMIDINoteOff;
     }
 
     private void OnDisable()
     {
         Keyboard.MIDIPlayed -= RecordMIDINote;
+        Keyboard.MIDIOff -= RecordMIDINoteOff;
     }
 
     private void Update()
@@ -128,6 +148,55 @@ public class MIDILooper : MonoBehaviour
         // }
     }
 
+    private IEnumerator PlayLoopsSequentially()
+    {
+        while (true)
+        {
+            for (int r = 0; r < MIDIRecordings.Count; r++)
+            {
+                Recording rec = MIDIRecordings[r];
+                rec.isPlayingInSequence = true;
+                rec.playbackStartTime = AudioSettings.dspTime;
+
+                List<Notes> sorted = rec.notes.OrderBy(o => o.timeNotePlayed).ToList();
+
+                for (int i = 0; i < sorted.Count; i++)
+                {
+                    float waitTime;
+                    if (i == 0)
+                        waitTime = (float)sorted[i].timeNotePlayed;
+                    else
+                        waitTime = (float)(sorted[i].timeNotePlayed - sorted[i - 1].timeNotePlayed);
+
+                    yield return new WaitForSeconds(waitTime);
+                    rec.helmController.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
+                }
+
+                if (sorted.Count > 0)
+                {
+                    float remaining = (float)(rec.recordingEndTime - sorted[sorted.Count - 1].timeNotePlayed);
+                    yield return new WaitForSeconds(remaining);
+                }
+
+                rec.isPlayingInSequence = false;
+            }
+
+            if (stopAfterCycle)
+            {
+                stopAfterCycle = false;
+                masterPlayback = null;
+                if (waitingToRecord && recorder != null)
+                {
+                    waitingToRecord = false;
+                    recOutput = true;
+                    recorder.StartSongTime();
+                    StartCoroutine(recorder.StartTime());
+                }
+                yield break;
+            }
+        }
+    }
+
     public void RecordLoop()
     {
         isPlaying = true;
@@ -135,28 +204,51 @@ public class MIDILooper : MonoBehaviour
         if (!recOutput)
         {
             //recording a brand new loop
-            recOutput = true;
             //create a new instance of the recording class
             recorder = new Recording();
-            recorder.StartSongTime();
             recorder.looper = this;
-            StartCoroutine(recorder.StartTime());
+            //recorder.StartSongTime();
+            //recorder.looper = this;
+            //StartCoroutine(recorder.StartTime());
+
+            if (MIDIRecordings.Count > 0)
+            {
+                waitingToRecord = true;
+                stopAfterCycle = true;
+
+                Recording master = MIDIRecordings[0];
+                double elapsed = AudioSettings.dspTime - master.songTime;
+                double postInCycle = elapsed % master.loopLength;
+                double timeUntilBoundary = master.loopLength - postInCycle;
+                recorder.songTime = AudioSettings.dspTime + timeUntilBoundary;
+            }
+            else
+            {
+                recOutput = true;
+                recorder.StartSongTime();
+                StartCoroutine(recorder.StartTime());
+            }
         }
         else
         {
             recOutput = false;
-            //if the recording has some midi notes recorded
+            //if the recording has some midi notes to be recorded
             if (recorder.notes.Count > 0)
             {
-                if (!recorder.loopComplete)
-                {
-                    recorder.loopComplete = true;
-                    recorder.RecordLoop();
-                    MIDIRecordings.Add(recorder);
-                    recorder.helmController = helmController;
-                    recorder.PlayNotes = recorder.PlayMIDINotes();
-                    StartCoroutine(recorder.PlayNotes);
-                }
+                MIDIRecordings.Add(recorder);
+                recorder.helmController = helmController;
+                //set the record stopping time here
+                recorder.recordingEndTime = recorder.songPos;
+                recorder.notes.RemoveAll(n => n.timeNotePlayed < 0);
+                recorder.RecordLoop();
+                recorder.loopComplete = true;
+                //recorder.PlayNotes = recorder.PlayMIDINotes();
+                //StartCoroutine(recorder.PlayNotes);
+
+                if (masterPlayback != null)
+                    StopCoroutine(masterPlayback);
+
+                masterPlayback = StartCoroutine(PlayLoopsSequentially());
             }
             else
                 recorder = null;
@@ -165,8 +257,7 @@ public class MIDILooper : MonoBehaviour
 
     public void Overdub()
     {
-        //if there is a current recording to overdub on (this will be the most recent loop)
-        if (recorder != null)
+        if (recorder != null && masterPlayback != null)
         {
             if (!recOutput)
             {
@@ -185,6 +276,7 @@ public class MIDILooper : MonoBehaviour
         }
     }
 
+    private Dictionary<int, Notes> pendingNotes = new Dictionary<int, Notes>();
     private void RecordMIDINote(int note, float velocity)
     {
         if (recOutput)
@@ -192,8 +284,31 @@ public class MIDILooper : MonoBehaviour
             Notes newNote = new Notes();
             newNote.noteNumber = note;
             newNote.noteVelocity = velocity;
-            newNote.timeNotePlayed = recorder.songPos;
+
+            if (recDub && recorder.isPlayingInSequence)
+            {
+                newNote.timeNotePlayed = AudioSettings.dspTime - recorder.playbackStartTime;
+            }
+            else
+            {
+                newNote.timeNotePlayed = recorder.songPos;
+            }
+
             recorder?.notes.Add(newNote);
+            pendingNotes[note] = newNote;
+        }
+    }
+
+    private void RecordMIDINoteOff(int note)
+    {
+        if (recOutput && pendingNotes.TryGetValue(note, out Notes pending))
+        {
+            double currentTime = (recDub && recorder.isPlayingInSequence)
+                ? AudioSettings.dspTime - recorder.playbackStartTime
+                : recorder.songPos;
+
+            pending.length = (float)currentTime - (float)pending.timeNotePlayed;
+            pendingNotes.Remove(note);
         }
     }
 
@@ -201,10 +316,9 @@ public class MIDILooper : MonoBehaviour
 
     public void StopPlaying()
     {
-        foreach (Recording recording in MIDIRecordings)
-        {
-            StopCoroutine(recording.PlayNotes);
-        }
+        if (masterPlayback != null)
+            StopCoroutine(masterPlayback);
+        masterPlayback = null;
         isPlaying = false;
     }
 
@@ -212,29 +326,31 @@ public class MIDILooper : MonoBehaviour
     {
         if (isPlaying) return;
         isPlaying = true;
-
-        foreach (Recording recording in MIDIRecordings)
-        {
-            StartCoroutine(recording.PlayNotes);
-        }
+        masterPlayback = StartCoroutine(PlayLoopsSequentially());
     }
 
     public void RemovePriorLoop()
     {
-        //if there is a loop to record
         if (MIDIRecordings.Count >= 1)
         {
-            //get the previous loop (or the only one) and stop playing sounds
+            if (masterPlayback != null)
+                StopCoroutine(masterPlayback);
+
             Recording priorRecording = MIDIRecordings[MIDIRecordings.Count - 1];
-            StopCoroutine(priorRecording.PlayNotes);
-            //if the recording is the current one we are looping then ensure the current recording is now null (i.e., reset it)
+
             if (recorder == priorRecording)
             {
                 recOutput = false;
                 recDub = false;
                 recorder = null;
             }
+
             MIDIRecordings.Remove(priorRecording);
+
+            if (MIDIRecordings.Count > 0)
+                masterPlayback = StartCoroutine(PlayLoopsSequentially());
+            else
+                masterPlayback = null;
         }
         else
             Debug.Log("No loops recorded!");

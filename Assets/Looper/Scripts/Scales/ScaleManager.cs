@@ -9,10 +9,27 @@ public class ScaleManager : MonoBehaviour
     public TextMeshProUGUI scaleText;
     public Text scaleCardText;
     public Text scaleDescText;
+    public Image colourPaletteIcon;
+    public Image gearIcon;
+    public Image exitIcon;
+    public Color darkArrowColour;
+    public Color lightArrowColour;
+    public Image[] arrows;
+
+    private void OnEnable()
+    {
+        NotationGenerator.UpdateScale += UpdateColours;
+    }
+
+    private void OnDisable()
+    {
+        NotationGenerator.UpdateScale -= UpdateColours;
+    }
 
     private void Start()
     {
         SetScaleText();
+        UpdateColours();
     }
 
     private void Update()
@@ -54,5 +71,31 @@ public class ScaleManager : MonoBehaviour
         scaleText.text = scaleName;
         scaleCardText.text = scaleName;
         scaleDescText.text = scaleDesc;
+    }
+
+    private void UpdateColours()
+    {
+        Color currentColour = lightArrowColour;
+        if (ColourCycler.currentColour != Color.black)
+        {
+            currentColour = darkArrowColour;
+        }
+
+        if (colourPaletteIcon != null)
+            colourPaletteIcon.color = currentColour;
+
+        if (scaleText != null)
+            scaleText.color = currentColour;
+
+        if (gearIcon != null)
+            gearIcon.color = currentColour;
+
+        if (exitIcon != null)
+            exitIcon.color = currentColour;
+
+        foreach (var arrow in arrows)
+        {
+            arrow.color = currentColour;
+        }
     }
 }

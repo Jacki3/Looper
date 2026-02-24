@@ -18,7 +18,7 @@ public class NotationGenerator : MonoBehaviour
     public bool spanMultipleOctaves;
     //how many higher octaves can we choose from?
     public int octaveRange;
-    public int totalMIDIKeys = 88;
+    public int totalMIDIKeys = 112;
 
     public List<Scale> scales = new List<Scale>();
 
@@ -27,6 +27,11 @@ public class NotationGenerator : MonoBehaviour
     public delegate void ChangeScaleEvent();
 
     public static event ChangeScaleEvent UpdateScale;
+
+    public static void TriggerUpdateScale()
+    {
+        UpdateScale?.Invoke();
+    }
 
     [System.Serializable]
     public class Scale
@@ -39,7 +44,7 @@ public class NotationGenerator : MonoBehaviour
 
     public enum ScaleNames
     {
-        Aeolian, Major, Hirajōshi, Minyō, Chromatic, Algerian, Altered, Bayātī, Blues, Dorian, HarmonicMinor, Hungarian, Insen, Iwato, Korsakovian, Lydian, MinorPentatonic, Pentatonic, Persian, Romanian, TriadMajor, TriadMinor, Tuvan, WholeTone,
+        Aeolian, Major, Hirajōshi, Minyō, Chromatic, Algerian, Altered, Bayātī, Blues, Dorian, HarmonicMinor, Hungarian, Insen, Iwato, Korsakovian, Lydian, MinorPentatonic, Pentatonic, Persian, Romanian, TriadMajor, TriadMinor, Tuvan, WholeTone
     };
 
     public enum RootNotes

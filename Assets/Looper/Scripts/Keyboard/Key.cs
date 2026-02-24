@@ -16,6 +16,8 @@ public class Key : ClickDetector
 
     public static event NoteOffEventHandler NoteOff;
 
+    private bool pointerDown = false;
+
     public override void OnPointerClick(PointerEventData eventData)
     {
         //click goes here
@@ -23,11 +25,13 @@ public class Key : ClickDetector
 
     public override void OnPointerDown(PointerEventData eventData)
     {
+        pointerDown = true;
         NoteOn(note, 1f);
     }
 
     public override void OnPointerUp(PointerEventData eventData)
     {
+        pointerDown = false;
         NoteOff(note);
     }
 
@@ -41,6 +45,7 @@ public class Key : ClickDetector
 
     public override void OnPointerExit(PointerEventData eventData)
     {
-        NoteOff(note);
+        if (pointerDown)
+            NoteOff(note);
     }
 }

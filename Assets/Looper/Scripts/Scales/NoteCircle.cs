@@ -76,6 +76,7 @@ public class NoteCircle : MonoBehaviour
             NoteLine newLine = Instantiate(noteLine, transform);
             newLine.transform.rotation = Quaternion.Euler(0, 0, (angle * note) * -1);
             currentLines.Add(newLine);
+            newLine.line.color = ColourCycler.currentColour;
             if (currentLines.Count <= 1)
                 newLine.line.color = rootColor;
         }

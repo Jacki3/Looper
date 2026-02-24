@@ -675,13 +675,37 @@ PrefabInstance:
     m_TransformParent: {fileID: 3659519136349208760}
     m_Modifications:
     - target: {fileID: 3773276157601606400, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
+      propertyPath: m_Text
+      value: Looper Guide
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773276157601606400, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
       propertyPath: m_FontData.m_Font
       value: 
       objectReference: {fileID: 12800000, guid: 462a5605cd4f4de48821603c760ce4a6, type: 3}
+    - target: {fileID: 3875423156529571568, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 357.1294
+      objectReference: {fileID: 0}
+    - target: {fileID: 3875423156529571568, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -260.46973
+      objectReference: {fileID: 0}
+    - target: {fileID: 3875423156529571570, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
+      propertyPath: m_Text
+      value: "- 'New Loop' \u2192 play notes \u2192 press again to stop. \n- 'New
+        Loop' while loops are playing \u2192 all existing loops finish \u2192 playback
+        stops \u2192 your cue to play \u2192 play notes \u2192 press again to stop.
+        The new loop is added to the end of the sequence.\n- 'Overdub' \u2192 play
+        notes over exisiting loop \u2192 press again to stop."
+      objectReference: {fileID: 0}
     - target: {fileID: 3875423156529571570, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
       propertyPath: m_FontData.m_Font
       value: 
       objectReference: {fileID: 12800000, guid: 99dec03033cf89c4b936367ceee96b05, type: 3}
+    - target: {fileID: 3875423156529571570, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3877163812447223074, guid: 61637de0c09dd7645a1b48f5d2bb3965, type: 3}
       propertyPath: m_Name
       value: AboutShortcute
