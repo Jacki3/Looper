@@ -3,7 +3,7 @@
     "m_SelectedProcess": {
         "deviceId": "28181FDH2009ST",
         "name": "com.BoggyGames.Looper",
-        "processId": 10226,
+        "processId": 12536,
         "exited": false
     },
     "m_SelectedPriority": 0,
@@ -30,6 +30,12 @@
             "deviceId": "28181FDH2009ST",
             "name": "com.BoggyGames.Looper",
             "processId": 10226,
+            "exited": false
+        },
+        {
+            "deviceId": "28181FDH2009ST",
+            "name": "com.BoggyGames.Looper",
+            "processId": 12536,
             "exited": false
         }
     ],

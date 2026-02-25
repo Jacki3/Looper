@@ -18,6 +18,8 @@ public class RhythmClock : MonoBehaviour
     public float secPerBeat;
     public float songPos;
     public float dspSongTime;
+    public UnityEngine.UI.Slider bpmSlider;
+    public TMPro.TextMeshProUGUI bpmText;
 
     [Header("Info")]
     //the total number of loops completed since the looping clip first started
@@ -55,6 +57,25 @@ public class RhythmClock : MonoBehaviour
 
         //Record the time when the music starts
         dspSongTime = (float)AudioSettings.dspTime;
+
+        if(bpmSlider)
+            bpmSlider.onValueChanged.AddListener(UpdateBPM);
+    }
+
+    void UpdateBPM(float BPM)
+    {
+        this.BPM = BPM;
+        secPerBeat = 60f / BPM;
+
+        if(bpmText)
+            bpmText.text = BPM.ToString();
+
+        // Recalculate song position in beats with new BPM
+        float currentSongPos = (float)(AudioSettings.dspTime - dspSongTime);
+        float newSongPositionInBeats = currentSongPos / secPerBeat;
+
+        // Recalculate completed loops so loopPositionInBeats stays valid
+        completedLoops = (int)(newSongPositionInBeats / beatsPerLoop);
     }
 
     void Update()
