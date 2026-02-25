@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,7 +17,25 @@ public class Key : ClickDetector
 
     public static event NoteOffEventHandler NoteOff;
 
-    private bool pointerDown = false;
+    static HashSet<int> activeNotes = new HashSet<int>();
+
+    void TriggerNoteOn(int noteToPlay)
+    {
+        if (!activeNotes.Contains(noteToPlay))
+        {
+            activeNotes.Add(noteToPlay);
+            NoteOn?.Invoke(noteToPlay, 1f);
+        }
+    }
+
+    void TriggerNoteOff(int noteToStop)
+    {
+        if (activeNotes.Contains(noteToStop))
+        {
+            activeNotes.Remove(noteToStop);
+            NoteOff?.Invoke(noteToStop);
+        }
+    }
 
     public override void OnPointerClick(PointerEventData eventData)
     {
@@ -25,27 +44,31 @@ public class Key : ClickDetector
 
     public override void OnPointerDown(PointerEventData eventData)
     {
-        pointerDown = true;
-        NoteOn(note, 1f);
+        TriggerNoteOn(note);
     }
 
     public override void OnPointerUp(PointerEventData eventData)
     {
-        pointerDown = false;
-        NoteOff(note);
+        // Turn off ALL active notes when finger/mouse is released
+        foreach (int activeNote in new HashSet<int>(activeNotes))
+        {
+            TriggerNoteOff(activeNote);
+        }
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
         if (Input.GetMouseButton(0) || Input.touchCount > 0)
         {
-            NoteOn(note, 1f);
+            TriggerNoteOn(note);
         }
     }
 
     public override void OnPointerExit(PointerEventData eventData)
     {
-        if (pointerDown)
-            NoteOff(note);
+        if (Input.GetMouseButton(0) || Input.touchCount > 0)
+        {
+            TriggerNoteOff(note);
+        }
     }
 }

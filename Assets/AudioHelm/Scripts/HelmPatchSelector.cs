@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -13,22 +12,16 @@ namespace AudioHelm
         public HelmController helmController;
         public TMP_Dropdown folderDropdown;
         public TMP_Dropdown patchDropdown;
-
-        [Header("Settings")]
-        public string presetsPath = "HelmPatches";
+        public HelmPatchLibrary library;
 
         [Header("Default Patch (matches Editor selection)")]
         public string defaultFolder = "Keys";
         public string defaultPatch = "Piano";
 
-        string basePath;
-        List<string> folderPaths = new List<string>();
-        List<string> patchPaths = new List<string>();
+        public static HelmPatch currentPatch;
 
         void Start()
         {
-            basePath = Path.Combine(Application.streamingAssetsPath, presetsPath);
-
             folderDropdown.onValueChanged.AddListener(OnFolderChanged);
             patchDropdown.onValueChanged.AddListener(OnPatchChanged);
 
@@ -38,7 +31,6 @@ namespace AudioHelm
             string patch = PlayerPrefs.GetString("HelmPatch", defaultPatch);
             SyncDropdownsToSavedPatch(folder, patch);
 
-            // Apply patch after native plugin has initialized
             StartCoroutine(ApplyInitialPatch());
         }
 
@@ -51,45 +43,30 @@ namespace AudioHelm
         void PopulateFolders()
         {
             folderDropdown.ClearOptions();
-            folderPaths.Clear();
 
-            if (!Directory.Exists(basePath))
+            if (library == null || library.folders == null || library.folders.Length == 0)
             {
-                Debug.LogWarning($"Presets folder not found: {basePath}");
+                Debug.LogWarning("HelmPatchLibrary is not assigned or empty.");
                 return;
             }
 
-            string[] directories = Directory.GetDirectories(basePath);
-            List<string> folderNames = new List<string>();
-
-            foreach (string dir in directories)
-            {
-                folderPaths.Add(dir);
-                folderNames.Add(Path.GetFileName(dir));
-            }
-
-            folderDropdown.AddOptions(folderNames);
+            folderDropdown.AddOptions(
+                library.folders.Select(f => f.folderName).ToList()
+            );
             ResizeDropdownToFit(folderDropdown);
 
-            if (folderPaths.Count > 0)
+            if (library.folders.Length > 0)
                 PopulatePatches(0);
         }
 
         void PopulatePatches(int folderIndex)
         {
             patchDropdown.ClearOptions();
-            patchPaths.Clear();
 
-            string[] files = Directory.GetFiles(folderPaths[folderIndex], "*.helm");
-            List<string> patchNames = new List<string>();
-
-            foreach (string file in files)
-            {
-                patchPaths.Add(file);
-                patchNames.Add(Path.GetFileNameWithoutExtension(file));
-            }
-
-            patchDropdown.AddOptions(patchNames);
+            var patches = library.folders[folderIndex].patches;
+            patchDropdown.AddOptions(
+                patches.Select(p => p.name.Replace(".helm", "")).ToList()
+            );
             ResizeDropdownToFit(patchDropdown);
         }
 
@@ -97,60 +74,29 @@ namespace AudioHelm
         {
             PopulatePatches(index);
 
-            if (patchPaths.Count > 0)
+            if (library.folders[index].patches.Length > 0)
                 OnPatchChanged(0);
         }
 
         void OnPatchChanged(int index)
         {
-            if (index < 0 || index >= patchPaths.Count)
+            var patches = library.folders[folderDropdown.value].patches;
+            if (index < 0 || index >= patches.Length)
                 return;
 
-            string json = File.ReadAllText(patchPaths[index]);
+            string json = patches[index].text;
             HelmPatchFormat patchData = JsonUtility.FromJson<HelmPatchFormat>(json);
-            ApplyPatch(patchData);
 
-            // Save the selection
+            GameObject temp = new GameObject("TempPatch");
+            HelmPatch patch = temp.AddComponent<HelmPatch>();
+            patch.patchData = patchData;
+
+            currentPatch = patch;
+            helmController.LoadPatch(patch);
+            Destroy(temp);
+
             PlayerPrefs.SetString("HelmFolder", folderDropdown.options[folderDropdown.value].text);
             PlayerPrefs.SetString("HelmPatch", patchDropdown.options[index].text);
-        }
-
-        void ApplyPatch(HelmPatchFormat patch)
-        {
-            int channel = helmController.channel;
-
-            Native.HelmClearModulations(channel);
-
-            FieldInfo[] fields = typeof(HelmPatchSettings).GetFields();
-            int paramIndex = 1;
-
-            foreach (FieldInfo field in fields)
-            {
-                if (!field.FieldType.IsArray && !field.IsLiteral)
-                {
-                    float val = (float)field.GetValue(patch.settings);
-                    Native.HelmSetParameterValue(channel, paramIndex, val);
-                    paramIndex++;
-                }
-            }
-
-            if (patch.settings.modulations != null)
-            {
-                int modIndex = 0;
-                foreach (HelmModulationSetting mod in patch.settings.modulations)
-                {
-                    if (modIndex >= HelmPatchSettings.kMaxModulations)
-                        break;
-
-                    Native.HelmAddModulation(
-                        channel, modIndex,
-                        mod.source,
-                        mod.destination,
-                        mod.amount
-                    );
-                    modIndex++;
-                }
-            }
         }
 
         void SyncDropdownsToSavedPatch(string folderName, string patchName)
@@ -170,11 +116,11 @@ namespace AudioHelm
                 if (patchDropdown.options[i].text == patchName)
                 {
                     patchDropdown.SetValueWithoutNotify(i);
-                    OnPatchChanged(i);
                     break;
                 }
             }
         }
+
         void ResizeDropdownToFit(TMP_Dropdown dropdown)
         {
             float maxWidth = 0f;
@@ -187,7 +133,6 @@ namespace AudioHelm
                     maxWidth = width;
             }
 
-            // Add padding for the dropdown arrow and margins
             maxWidth += 50f;
 
             RectTransform rt = dropdown.GetComponent<RectTransform>();

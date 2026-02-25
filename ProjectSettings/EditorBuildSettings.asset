@@ -9,3 +9,4 @@ EditorBuildSettings:
     path: Assets/Looper/Looper.unity
     guid: edeceda53bd51e34ba9a5d274d87de28
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

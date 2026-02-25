@@ -12,6 +12,7 @@ public class MIDILooper : MonoBehaviour
     public HelmController helmController;
     public List<Recording> MIDIRecordings = new List<Recording>();
     private Recording recorder;
+    public HelmChannel[] channels = new HelmChannel[15];
     private Coroutine masterPlayback;
     private bool stopAfterCycle;
     private bool waitingToRecord;
@@ -108,6 +109,41 @@ public class MIDILooper : MonoBehaviour
     }
 
     [Serializable]
+    public class HelmChannel
+    {
+        public HelmController controller;
+        public string patchName;
+        public List<Recording> recordings = new List<Recording>();
+        public bool InUse => recordings.Count > 0;
+    }
+
+    private HelmChannel FindOrAllocateChannel()
+    {
+        string patchName = HelmPatchSelector.currentPatch.patchData.patch_name;
+        // First: find an existing channel with the same patch
+        for (int i = 0; i < channels.Length; i++)
+        {
+            if (channels[i].InUse && channels[i].patchName == patchName)
+                return channels[i];
+        }
+
+        // Second: find the next free channel
+        for (int i = 0; i < channels.Length; i++)
+        {
+            if (!channels[i].InUse)
+            {
+                channels[i].patchName = patchName;
+                channels[i].controller.LoadPatch(HelmPatchSelector.currentPatch);
+                return channels[i];
+            }
+        }
+
+        // No channels available
+        Debug.LogWarning("All 15 loop channels are in use!");
+        return null;
+    }
+
+    [Serializable]
     public class Notes
     {
         //what note was played?
@@ -120,6 +156,7 @@ public class MIDILooper : MonoBehaviour
         public double timeNotePlayed;
         // how long the note was held down for
         public float length;
+        public HelmController controller;
     }
 
     private void OnEnable()
@@ -132,20 +169,6 @@ public class MIDILooper : MonoBehaviour
     {
         Keyboard.MIDIPlayed -= RecordMIDINote;
         Keyboard.MIDIOff -= RecordMIDINoteOff;
-    }
-
-    private void Update()
-    {
-        //Debug settings for keyboard controls for looper
-        // if (Input.GetKeyDown(KeyCode.R))
-        // {
-        //     RecordLoop();
-        // }
-
-        // if (Input.GetKeyDown(KeyCode.E))
-        // {
-        //     Overdub();
-        // }
     }
 
     private IEnumerator PlayLoopsSequentially()
@@ -169,7 +192,8 @@ public class MIDILooper : MonoBehaviour
                         waitTime = (float)(sorted[i].timeNotePlayed - sorted[i - 1].timeNotePlayed);
 
                     yield return new WaitForSeconds(waitTime);
-                    rec.helmController.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
+                    //rec.helmController.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
+                    sorted[i].controller.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
                 }
 
                 if (sorted.Count > 0)
@@ -235,23 +259,27 @@ public class MIDILooper : MonoBehaviour
             //if the recording has some midi notes to be recorded
             if (recorder.notes.Count > 0)
             {
-                MIDIRecordings.Add(recorder);
-                recorder.helmController = helmController;
-                //set the record stopping time here
-                recorder.recordingEndTime = recorder.songPos;
-                recorder.notes.RemoveAll(n => n.timeNotePlayed < 0);
-                recorder.RecordLoop();
                 recorder.loopComplete = true;
-                //recorder.PlayNotes = recorder.PlayMIDINotes();
-                //StartCoroutine(recorder.PlayNotes);
+                recorder.RecordLoop();
 
-                if (masterPlayback != null)
-                    StopCoroutine(masterPlayback);
+                HelmChannel channel = FindOrAllocateChannel();
 
-                masterPlayback = StartCoroutine(PlayLoopsSequentially());
+                if (channel != null)
+                {
+                    recorder.helmController = channel.controller;
+                    channel.recordings.Add(recorder);
+                    MIDIRecordings.Add(recorder);
+                    recorder.recordingEndTime = recorder.songPos;
+                    recorder.notes.RemoveAll(n => n.timeNotePlayed < 0);
+                }
             }
             else
                 recorder = null;
+
+            if (masterPlayback != null)
+                StopCoroutine(masterPlayback);
+            if (MIDIRecordings.Count > 0)
+                masterPlayback = StartCoroutine(PlayLoopsSequentially());
         }
     }
 
@@ -259,20 +287,23 @@ public class MIDILooper : MonoBehaviour
     {
         if (recorder != null && masterPlayback != null)
         {
+            if (MIDIRecordings.Count == 0 || masterPlayback == null)
+            {
+                Debug.Log("No loop to overdub on!");
+                return;
+            }
+
             if (!recOutput)
             {
                 recOutput = true;
                 recDub = true;
+                HelmChannel channel = FindOrAllocateChannel();
             }
             else
             {
                 recOutput = false;
                 recDub = false;
             }
-        }
-        else
-        {
-            Debug.Log("No loop to overdub on!");
         }
     }
 
@@ -281,35 +312,52 @@ public class MIDILooper : MonoBehaviour
     {
         if (recOutput)
         {
+            HelmChannel channel = FindOrAllocateChannel();
+            if (channel == null) return;
+
+            // If overdubbing, add to whichever recording is currently playing
+            Recording target = recDub ? GetActiveRecording() : recorder;
+            if (target == null) return;
+
             Notes newNote = new Notes();
             newNote.noteNumber = note;
             newNote.noteVelocity = velocity;
+            newNote.controller = channel.controller;
 
-            if (recDub && recorder.isPlayingInSequence)
-            {
-                newNote.timeNotePlayed = AudioSettings.dspTime - recorder.playbackStartTime;
-            }
+            if (recDub && target.isPlayingInSequence)
+                newNote.timeNotePlayed = AudioSettings.dspTime - target.playbackStartTime;
             else
-            {
-                newNote.timeNotePlayed = recorder.songPos;
-            }
+                newNote.timeNotePlayed = target.songPos;
 
-            recorder?.notes.Add(newNote);
+            target.notes.Add(newNote);
             pendingNotes[note] = newNote;
         }
     }
 
     private void RecordMIDINoteOff(int note)
     {
-        if (recOutput && pendingNotes.TryGetValue(note, out Notes pending))
+        if (pendingNotes.TryGetValue(note, out Notes pending))
         {
-            double currentTime = (recDub && recorder.isPlayingInSequence)
-                ? AudioSettings.dspTime - recorder.playbackStartTime
-                : recorder.songPos;
+            Recording target = recDub ? GetActiveRecording() : recorder;
+            if (target == null) return;
 
-            pending.length = (float)currentTime - (float)pending.timeNotePlayed;
+            double currentTime = (recDub && target.isPlayingInSequence)
+                ? AudioSettings.dspTime - target.playbackStartTime
+                : target.songPos;
+
+            pending.length = (float)(currentTime - pending.timeNotePlayed);
             pendingNotes.Remove(note);
         }
+    }
+
+    private Recording GetActiveRecording()
+    {
+        for (int i = 0; i < MIDIRecordings.Count; i++)
+        {
+            if (MIDIRecordings[i].isPlayingInSequence)
+                return MIDIRecordings[i];
+        }
+        return null;
     }
 
     private bool isPlaying;
@@ -336,7 +384,19 @@ public class MIDILooper : MonoBehaviour
             if (masterPlayback != null)
                 StopCoroutine(masterPlayback);
 
+
             Recording priorRecording = MIDIRecordings[MIDIRecordings.Count - 1];
+
+            foreach (HelmChannel channel in channels)
+            {
+                if (channel.recordings.Remove(priorRecording))
+                {
+                    // If channel has no more recordings, it's free again
+                    if (!channel.InUse)
+                        channel.patchName = null;
+                    break;
+                }
+            }
 
             if (recorder == priorRecording)
             {
