@@ -1,43 +1,39 @@
 fileFormatVersion: 2
 guid: 97c7e4f37c28eea41abc32c1a96c3835
-timeCreated: 1488505655
-licenseType: Store
 PluginImporter:
-  serializedVersion: 1
+  externalObjects: {}
+  serializedVersion: 3
   iconMap: {}
   executionOrder: {}
+  defineConstraints: []
   isPreloaded: 1
+  isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
   platformData:
     Android:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        AndroidLibraryDependee: UnityLibrary
+        AndroidSharedLibraryType: Executable
+        CPU: ARMv7
     Any:
       enabled: 0
-      settings: {}
+      settings:
+        Exclude Android: 1
+        Exclude Editor: 1
+        Exclude Linux64: 1
+        Exclude OSXUniversal: 1
+        Exclude WebGL: 1
+        Exclude Win: 0
+        Exclude Win64: 1
     Editor:
-      enabled: 1
-      settings:
-        CPU: x86
-        DefaultValueInitialized: true
-        OS: Windows
-    Linux:
-      enabled: 1
-      settings:
-        CPU: x86
-    Linux64:
       enabled: 0
       settings:
-        CPU: None
-    LinuxUniversal:
-      enabled: 1
-      settings:
-        CPU: x86
-    OSXIntel:
-      enabled: 1
-      settings:
         CPU: AnyCPU
-    OSXIntel64:
+        DefaultValueInitialized: true
+        OS: Windows
+    Linux64:
       enabled: 0
       settings:
         CPU: None
@@ -45,6 +41,9 @@ PluginImporter:
       enabled: 0
       settings:
         CPU: x86
+    WebGL:
+      enabled: 0
+      settings: {}
     Win:
       enabled: 1
       settings:
