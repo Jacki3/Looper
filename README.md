@@ -1,5 +1,5 @@
 # Looper
-Play in musical scales and record simple loops.
+Play in musical scales and record simple loops. Find the Desktop release here!
 
 
 I was inspired by <a href="https://femurdesign.com/omni/">OMNI by Femur</a> and became captivated by scales.
