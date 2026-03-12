@@ -1,6 +1,11 @@
 # Looper
-Play in musical scales and record simple loops. Find the Desktop release here!
+Play in musical scales and record simple loops. Find the Desktop release here (MacOS only on itch)!
 
+<a href="https://apps.microsoft.com/detail/9nzs7xhnznj0?hl=en-GB&gl=GB">Microsoft Store Release</a>
+
+https://jdotb.itch.io/looper
+
+## About
 
 I was inspired by <a href="https://femurdesign.com/omni/">OMNI by Femur</a> and became captivated by scales.
 
@@ -8,9 +13,15 @@ I was inspired by <a href="https://femurdesign.com/omni/">OMNI by Femur</a> and 
 
 Play the keys with mouse or touch or even plug a MIDI keyboard in. Record simple loops and have fun exploring the unique sounds of different cultures patterns!
 
-<a href="https://apps.microsoft.com/detail/9nzs7xhnznj0?hl=en-GB&gl=GB">Microsoft Store Release</a>
+## Become an Android tester!
 
-https://jdotb.itch.io/looper
+If you wish to participate in closed testing and support the release of Looper on Android then please follow the steps below. Thank you for your time and dedication!
+
+ Step-by-Step Access:
+
+**1. Join the Group:**  https://groups.google.com/g/looper-closed-test
+
+**2. Download App**: https://play.google.com/apps/testing/com.BoggyGames.Looper
 
 <p><a href="https://jdotb.itch.io/looper">
 <img src="https://github.com/Jacki3/jackbrett/blob/main/img/portfolio/loopersplash.jpg" style="max-width: 100%;">
