@@ -10,6 +10,7 @@ public class NoteCircle : MonoBehaviour
     public NoteLine noteLine;
     public Color rootColor;
     public NoteText noteText;
+    public Transform noteLetterParent;
     public List<NoteLine> currentLines = new List<NoteLine>();
     public List<NoteText> currentTexts = new List<NoteText>();
 
@@ -52,7 +53,11 @@ public class NoteCircle : MonoBehaviour
 
         for (int i = 0; i < noteLetters.Length; i++)
         {
-            NoteText newText = Instantiate(noteText, transform.root);
+            Transform parent = transform.root;
+            if (noteLetterParent != null)
+                parent = noteLetterParent;
+
+            NoteText newText = Instantiate(noteText, parent);
             newText.transform.rotation = Quaternion.Euler(0, 0, (angle * i) * -1);
             //ensure the text rotation is the opposite of the object it is attached to ensure it appears upright
             newText.letter.rectTransform.localRotation = Quaternion.Euler(0, 0, angle * i);

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fe5868df240db084c94b4826d18b5037
+guid: b3761759402d3fe4da5086f6e8af3813
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -122,6 +122,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -129,10 +142,10 @@ TextureImporter:
       name: loopLogoAllRedNoBg_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 1
-        width: 349
-        height: 350
+        x: 4
+        y: 2
+        width: 501
+        height: 504
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

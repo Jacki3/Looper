@@ -12,13 +12,13 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Boggy Games
+  companyName: Boggy Entertainment
   productName: Looper
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
   m_ShowUnitySplashScreen: 1
-  m_ShowUnitySplashLogo: 1
+  m_ShowUnitySplashLogo: 0
   m_SplashScreenOverlayOpacity: 0
   m_SplashScreenAnimation: 1
   m_SplashScreenLogoStyle: 1
@@ -145,7 +145,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 1.0
+  bundleVersion: 1.0.1
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -169,14 +169,14 @@ PlayerSettings:
   androidMinAspectRatio: 1
   applicationIdentifier:
     Android: com.BoggyGames.Looper
-    Standalone: com.DefaultCompany.Looper
+    Standalone: com.Boggy.Looper
   buildNumber:
-    Standalone: 0
+    Standalone: 1
     VisionOS: 0
     iPhone: 0
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 1
+  AndroidBundleVersionCode: 2
   AndroidMinSdkVersion: 25
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
@@ -272,8 +272,8 @@ PlayerSettings:
   AndroidAllowedArchitectures: -1
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: 
-  AndroidKeyaliasName: 
+  AndroidKeystoreName: '{inproject}: Builds/Android/looper.keystore'
+  AndroidKeyaliasName: looper
   AndroidEnableArmv9SecurityFeatures: 0
   AndroidEnableArm64MTE: 0
   AndroidBuildApkPerCpuArchitecture: 0
@@ -285,7 +285,7 @@ PlayerSettings:
   AndroidEnableTango: 0
   androidEnableBanner: 1
   androidUseLowAccuracyLocation: 0
-  androidUseCustomKeystore: 0
+  androidUseCustomKeystore: 1
   m_AndroidBanners:
   - width: 320
     height: 180
@@ -369,8 +369,8 @@ PlayerSettings:
       m_Kind: 1
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 92ea895d681c10a4d9d9c279d63a9c87, type: 3}
-      - {fileID: 2800000, guid: fe5868df240db084c94b4826d18b5037, type: 3}
+      - {fileID: 2800000, guid: efd7ec4745c4b8e408b18d7c942b28c4, type: 3}
+      - {fileID: 2800000, guid: 88c60231dc54164409db75f5357d6fb9, type: 3}
       m_Width: 432
       m_Height: 432
       m_Kind: 2
@@ -409,6 +409,9 @@ PlayerSettings:
     m_DynamicBatching: 0
   - m_BuildTarget: WebGL
     m_StaticBatching: 0
+    m_DynamicBatching: 0
+  - m_BuildTarget: Windows Store Apps
+    m_StaticBatching: 1
     m_DynamicBatching: 0
   m_BuildTargetShaderSettings: []
   m_BuildTargetGraphicsJobs:
@@ -754,13 +757,14 @@ PlayerSettings:
     Standalone: MOREMOUNTAINS_INTERFACE;MOREMOUNTAINS_INVENTORYENGINE;MOREMOUNTAINS_TOPDOWNENGINE;UNITY_POST_PROCESSING_STACK_V2;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
     VisionOS: UNITY_POST_PROCESSING_STACK_V2
     WebGL: UNITY_POST_PROCESSING_STACK_V2;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
-    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2
+    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
     tvOS: UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
+    Standalone: 0
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   il2cppStacktraceInformation: {}
@@ -774,19 +778,24 @@ PlayerSettings:
   gcIncremental: 1
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform: {}
-  editorAssembliesCompatibilityLevel: 1
+  editorAssembliesCompatibilityLevel: 2
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: 2D_BuiltInRenderer
-  metroPackageVersion: 
-  metroCertificatePath: 
-  metroCertificatePassword: 
-  metroCertificateSubject: 
-  metroCertificateIssuer: 
-  metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: 2D_BuiltInRenderer
-  wsaImages: {}
-  metroTileShortName: 
+  metroPackageName: Looper
+  metroPackageVersion: 1.0.0.0
+  metroCertificatePath: Assets/WSATestCertificate.pfx
+  metroCertificatePassword: Nckku5<5Lr
+  metroCertificateSubject: Boggy
+  metroCertificateIssuer: Boggy
+  metroCertificateNotAfter: 807c2eee19cadd01
+  metroApplicationDescription: Play in musical scales!
+  wsaImages:
+    2031716: Assets/Looper/Sprites/loopLogoAllRedNoBg_44.png
+    2097252: Assets/Looper/Sprites/loopLogoAllRedNoBg _71.png
+    2162788: Assets/Looper/Sprites/loopLogoAllRedNoBg _150.png
+    2228324: Assets/Looper/Sprites/loopLogoAllRedNoBg_350.png
+    2293860: Assets/Looper/Sprites/loopLogoAllRedNoBg 1.png
+  metroTileShortName: Looper
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0

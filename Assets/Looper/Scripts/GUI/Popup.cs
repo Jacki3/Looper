@@ -1,5 +1,5 @@
-using UnityEngine;
 using MoreMountains.Feedbacks;
+using UnityEngine;
 
 /// <summary>
 /// A component to handle popups, their opening and closing
@@ -49,6 +49,7 @@ public class Popup : MonoBehaviour
     {
         if (CurrentlyOpen)
         {
+            Close();
             return;
         }
 
@@ -64,6 +65,7 @@ public class Popup : MonoBehaviour
     {
         if (!CurrentlyOpen)
         {
+            Open();
             return;
         }
 
