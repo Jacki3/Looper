@@ -173,9 +173,25 @@ public class MIDILooper : MonoBehaviour
 
     private IEnumerator PlayLoopsSequentially()
     {
+        // Guard: nothing to play
+        if (MIDIRecordings.Count == 0)
+        {
+            isPlaying = false;
+            masterPlayback = null;
+            yield break;
+        }
+
+        // Cache reusable WaitForSeconds to avoid per-frame heap allocation
+        WaitForSeconds cachedWait = new WaitForSeconds(0f);
+        // Cache a single WaitForEndOfFrame for zero-wait yields
+        WaitForEndOfFrame frameWait = new WaitForEndOfFrame();
+
         while (true)
         {
-            for (int r = 0; r < MIDIRecordings.Count; r++)
+            // Snapshot count at start of cycle to avoid mid-cycle list mutation issues
+            int recordingCount = MIDIRecordings.Count;
+
+            for (int r = 0; r < recordingCount; r++)
             {
                 Recording rec = MIDIRecordings[r];
                 rec.isPlayingInSequence = true;
@@ -191,24 +207,42 @@ public class MIDILooper : MonoBehaviour
                     else
                         waitTime = (float)(sorted[i].timeNotePlayed - sorted[i - 1].timeNotePlayed);
 
-                    yield return new WaitForSeconds(waitTime);
-                    //rec.helmController.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
+                    if (waitTime > 0f)
+                    {
+                        double targetTime = AudioSettings.dspTime + waitTime;
+                        while (AudioSettings.dspTime < targetTime)
+                            yield return null;
+                    }
+                    else
+                    {
+                        yield return null; // Always yield at least once to prevent freeze
+                    }
+
                     sorted[i].controller.NoteOn(sorted[i].noteNumber, 1f, sorted[i].length);
                 }
 
+                // Wait out the remainder of the loop
                 if (sorted.Count > 0)
                 {
                     float remaining = (float)(rec.recordingEndTime - sorted[sorted.Count - 1].timeNotePlayed);
-                    yield return new WaitForSeconds(remaining);
+                    if (remaining > 0f)
+                    {
+                        double targetTime = AudioSettings.dspTime + remaining;
+                        while (AudioSettings.dspTime < targetTime)
+                            yield return null;
+                    }
                 }
 
                 rec.isPlayingInSequence = false;
             }
 
+            // Handle scheduled stop at cycle boundary
             if (stopAfterCycle)
             {
                 stopAfterCycle = false;
+                isPlaying = false;
                 masterPlayback = null;
+
                 if (waitingToRecord && recorder != null)
                 {
                     waitingToRecord = false;
@@ -216,6 +250,14 @@ public class MIDILooper : MonoBehaviour
                     recorder.StartSongTime();
                     StartCoroutine(recorder.StartTime());
                 }
+                yield break;
+            }
+
+            // Guard against list becoming empty mid-session
+            if (MIDIRecordings.Count == 0)
+            {
+                isPlaying = false;
+                masterPlayback = null;
                 yield break;
             }
         }
@@ -372,7 +414,7 @@ public class MIDILooper : MonoBehaviour
 
     public void StartPlaying()
     {
-        if (isPlaying) return;
+        if (isPlaying || MIDIRecordings.Count == 0) return;
         isPlaying = true;
         masterPlayback = StartCoroutine(PlayLoopsSequentially());
     }
