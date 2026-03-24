@@ -28,6 +28,8 @@ public class NoteText : MonoBehaviour
 
     private void UpdateColours()
     {
+        return;
+
         if (ColourCycler.currentColour == Color.black)
         {
             letter.color = Color.white;

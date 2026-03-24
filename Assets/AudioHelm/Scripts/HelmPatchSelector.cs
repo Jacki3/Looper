@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -123,6 +122,8 @@ namespace AudioHelm
 
         void ResizeDropdownToFit(TMP_Dropdown dropdown)
         {
+            return;
+
             float maxWidth = 0f;
             TMP_Text label = dropdown.captionText;
 
