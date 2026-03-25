@@ -63,6 +63,12 @@ public class ScaleManager : MonoBehaviour
         SetScaleText();
     }
 
+    public void ChangeScale(int index)
+    {
+        notationGenerator.UpdateScaleChoice(index);
+        SetScaleText();
+    }
+
     private void SetScaleText()
     {
         string scaleName = notationGenerator.GetScaleName();
