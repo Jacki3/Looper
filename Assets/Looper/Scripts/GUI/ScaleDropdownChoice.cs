@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -20,12 +21,13 @@ public class ScaleDropdownChoice : MonoBehaviour
         scaleDropdown?.ClearOptions();
         scaleDropdown?.AddOptions(scaleManager.notationGenerator.scales.Select(s => s.name).ToList());
 
-        Invoke("UpdateScaleChoice", 0.5f);
+        Invoke("UpdateScaleChoice", 0.25f);
     }
 
     private void UpdateScaleChoice()
     {
-        scaleDropdown.value = 3;
+        int index = (int)Enum.Parse(typeof(NotationGenerator.ScaleNames), scaleManager.scaleText.text);
+        scaleDropdown.value = index;
     }
 
     private void OnScaleChanged(int index)
