@@ -10,6 +10,7 @@ public class ScaleManager : MonoBehaviour
     public Text scaleCardText;
     public Text scaleDescText;
     public Image colourPaletteIcon;
+    public Image randomIcon;
     public Image gearIcon;
     public Image exitIcon;
     public Color darkArrowColour;
@@ -19,11 +20,13 @@ public class ScaleManager : MonoBehaviour
     private void OnEnable()
     {
         NotationGenerator.UpdateScale += UpdateColours;
+        NotationGenerator.UpdateScale += SetScaleText;
     }
 
     private void OnDisable()
     {
         NotationGenerator.UpdateScale -= UpdateColours;
+        NotationGenerator.UpdateScale -= SetScaleText;
     }
 
     private void Start()
@@ -89,6 +92,9 @@ public class ScaleManager : MonoBehaviour
 
         if (colourPaletteIcon != null)
             colourPaletteIcon.color = currentColour;
+
+        if (randomIcon != null)
+            randomIcon.color = currentColour;
 
         if (scaleText != null)
             scaleText.color = currentColour;

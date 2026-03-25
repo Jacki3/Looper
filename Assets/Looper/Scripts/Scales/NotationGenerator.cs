@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class NotationGenerator : MonoBehaviour
 {
     public int[] notes;
     public bool useScale;
+    public bool chooseRandomScaleOnStart = false;
     public ScaleNames scaleChoice;
     public RootNotes rootNote;
     public int octavesAbove = 5;
@@ -54,6 +56,11 @@ public class NotationGenerator : MonoBehaviour
 
     private void Awake()
     {
+        if (chooseRandomScaleOnStart)
+        {
+            scaleChoice = GetRandomScale();
+        }
+
         if (useScale)
             noteList = GetScaleFromRoot();
         else
@@ -67,7 +74,7 @@ public class NotationGenerator : MonoBehaviour
 
         for (int i = 0; i < length; i++)
         {
-            int randNote = noteList[Random.Range(0, noteList.Length)];
+            int randNote = noteList[UnityEngine.Random.Range(0, noteList.Length)];
             newPhrase[i] = randNote;
         }
         return newPhrase;
@@ -140,13 +147,21 @@ public class NotationGenerator : MonoBehaviour
         return scaleChoice;
     }
 
+    public void ChooseRandomScale()
+    {
+        scaleChoice = GetRandomScale();
+        noteList = GetScaleFromRoot();
+
+        TriggerUpdateScale();
+    }
+
     public string GetScaleDesc()
     {
         foreach (Scale scale in scales)
             if (scale.scaleEnum == scaleChoice)
                 return scale.description;
 
-        Debug.LogError("No matching scale to scale choice: select a new scale or add the chosen one to the list!");
+        Debug.LogWarning("No matching scale to scale choice: select a new scale or add the chosen one to the list!");
         return null;
     }
 
@@ -156,7 +171,30 @@ public class NotationGenerator : MonoBehaviour
             if (scale.scaleEnum == scaleChoice)
                 return scale.name;
 
-        Debug.LogError("No matching scale to scale choice: select a new scale or add the chosen one to the list!");
+        Debug.LogWarning("No matching scale to scale choice: select a new scale or add the chosen one to the list!");
         return null;
+    }
+
+    public int GetScaleAtIndex()
+    {
+        for (int i = 0; i < scales.Count; i++)
+        {
+            if (scales[i].scaleEnum == scaleChoice)
+            {
+                return i;
+            }
+        }
+
+        Debug.LogWarning("The current scaleChoice was not found in the scales list.");
+        return -1;
+    }
+
+    public ScaleNames GetRandomScale()
+    {
+        Array values = Enum.GetValues(typeof(NotationGenerator.ScaleNames));
+
+        int randomIndex = UnityEngine.Random.Range(0, values.Length);
+
+        return (ScaleNames)values.GetValue(randomIndex);
     }
 }
