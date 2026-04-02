@@ -1,6 +1,8 @@
 # Looper
 Play in musical scales and record simple loops. Find the Desktop release here (MacOS only on itch)!
 
+<a href="https://play.google.com/store/apps/details?id=com.BoggyGames.Looper">Google Play Store Release</a>
+
 <a href="https://apps.microsoft.com/detail/9nzs7xhnznj0?hl=en-GB&gl=GB">Microsoft Store Release</a>
 
 https://jdotb.itch.io/looper
